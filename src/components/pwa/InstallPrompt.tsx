@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { X, Download, Share } from 'lucide-react'
 import Image from 'next/image'
-import logo from '@/assets/images/eStay.svg'
+import logoFallback from '@/assets/images/eStay.svg'
+import { useSelector } from 'react-redux'
+import { settingsSelector } from '@/redux/reducers/settingsSlice'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -31,6 +33,11 @@ export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showBanner, setShowBanner] = useState(false)
   const [isIOSDevice, setIsIOSDevice] = useState(false)
+
+  // Dynamic branding from admin settings (same source as Header logo + favicon)
+  const settingsData = useSelector(settingsSelector)
+  const dynamicLogo = settingsData?.branding?.logo || settingsData?.web_config?.favicon || logoFallback
+  const appName = process.env.NEXT_PUBLIC_WEB_NAME || 'eStay'
 
   useEffect(() => {
     if (!isMobile()) return
@@ -76,14 +83,14 @@ export default function InstallPrompt() {
     <div className="fixed bottom-24 left-4 right-4 z-50 md:hidden">
       <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-lg border border-gray-100">
         <Image
-          src={logo}
-          alt="eStay"
+          src={dynamicLogo}
+          alt={appName}
           width={40}
           height={40}
           className="rounded-xl shrink-0 object-contain"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900 leading-tight">Install eStay</p>
+          <p className="text-sm font-semibold text-gray-900 leading-tight">Install {appName}</p>
           {isIOSDevice ? (
             <p className="text-xs text-gray-500 mt-0.5 leading-tight">
               Tap <Share size={11} className="inline mb-0.5" /> then &ldquo;Add to Home Screen&rdquo;
